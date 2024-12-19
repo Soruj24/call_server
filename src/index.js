@@ -2,21 +2,30 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const http = require('http');
-const { Server } = require('socket.io'); // Import Server from socket.io
+const { Server } = require('socket.io');
 
-const port = 3000; // Define the port number
+const port = 3000;
 
 app.use(express.json());
+
+// CORS পলিসি সঠিকভাবে সেট করা
 app.use(
     cors({
-        origin: 'http://localhost:5173',
+        origin: 'http://localhost:5173', // আপনার ফ্রন্টএন্ডের URL
         methods: ['GET', 'POST'],
-        credentials: true,
+        credentials: true, // Credentials অনুমতি দিন (যদি প্রয়োজন)
     })
 );
 
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
+
+// Socket.IO এর জন্য আলাদা CORS পলিসি
+const io = new Server(server, {
+    cors: {
+        origin: 'http://localhost:5173', // ফ্রন্টএন্ডের URL
+        methods: ['GET', 'POST'],
+    },
+});
 
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
@@ -38,18 +47,19 @@ io.on('connection', (socket) => {
     });
 });
 
+// Test Route
+app.get('/', (req, res) => {
+    res.send('Hello World from server');
+});
 
-app.get("/",(req,res)=>{
-    res.send("Hello World from server");
-})
-
+// Server Listening
 server.listen(port, async () => {
     try {
-        const chalk = (await import('chalk')).default; // Dynamically import chalk
-        console.log(chalk.green.bold(`✅ Server is running on port ${port}`)); // Green for success
+        const chalk = (await import('chalk')).default;
+        console.log(chalk.green.bold(`✅ Server is running on port ${port}`));
     } catch (err) {
-        const chalk = (await import('chalk')).default; // Import again for error
-        console.error(chalk.red.bold(`❌ Failed to start server: ${err.message}`)); // Red for errors
+        const chalk = (await import('chalk')).default;
+        console.error(chalk.red.bold(`❌ Failed to start server: ${err.message}`));
         process.exit(1);
     }
 });
