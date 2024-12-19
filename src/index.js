@@ -38,6 +38,11 @@ io.on('connection', (socket) => {
     });
 });
 
+
+app.get("/",(req,res)=>{
+    res.send("Hello World");
+})
+
 server.listen(port, async () => {
     try {
         const chalk = (await import('chalk')).default; // Dynamically import chalk
